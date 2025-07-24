@@ -1,0 +1,7 @@
+venv
+*.env
+.vscode
+node_modules
+alembic/versions
+__pycache__
+ 
