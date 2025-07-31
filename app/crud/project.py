@@ -1,6 +1,8 @@
+from fastapi import HTTPException
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
-from app.models.project import ProjectManagement
-from app.schemas.project import ProjectCreate
+from app.models.project import ProjectManagement, ProjectStatus
+from app.schemas.project import ProjectCreate, ProjectFilter, ProjectUpdate
 
 def create_project(db: Session, project: ProjectCreate, user_id: int):
     new_project = ProjectManagement(
@@ -15,10 +17,53 @@ def create_project(db: Session, project: ProjectCreate, user_id: int):
         hosting_amount=project.hosting_amount,
         company_id=project.company_id,
         currency=project.currency,
-        status=project.status,
+        status=ProjectStatus(project.status),
         created_by=user_id
     )
     db.add(new_project)
     db.commit()
     db.refresh(new_project)
     return new_project
+
+def get_projects(db: Session, filters: ProjectFilter):
+    query = db.query(ProjectManagement)
+
+    if filters.status:
+        query = query.filter(ProjectManagement.status == filters.status)
+
+    if filters.company_id:
+        query = query.filter(ProjectManagement.company_id == filters.company_id)
+
+    sort_column = getattr(ProjectManagement, filters.sort_by, ProjectManagement.created_at)
+    if filters.sort_order == "asc":
+        query = query.order_by(asc(sort_column))
+    else:
+        query = query.order_by(desc(sort_column))
+
+    return query.all()
+
+def update_project(db: Session, project_id: int, project: ProjectUpdate, user_id: int):
+    db_project = db.query(ProjectManagement).filter(ProjectManagement.id == project_id).first()
+    if not db_project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    for field, value in project.dict(exclude_unset=True).items():
+        setattr(db_project, field, value)
+
+    db_project.updated_by = user_id
+    db.commit()
+    db.refresh(db_project)
+    return db_project
+
+def soft_delete_project(db: Session, project_id: int):
+    project = db.query(ProjectManagement).filter(ProjectManagement.id == project_id).first()
+
+    if not project:
+        return "not_found"
+    if project.is_deleted:
+        return "already_deleted"
+
+    project.is_deleted = True
+    db.commit()
+    db.refresh(project)
+    return "deleted"
