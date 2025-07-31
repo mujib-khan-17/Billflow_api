@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, DECIMAL, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, Enum, DECIMAL, ForeignKey
 from app.database import Base
 from sqlalchemy.sql import func
 
@@ -30,3 +30,4 @@ class ProjectManagement(Base):
     updated_by = Column(Integer, ForeignKey("user_master.id"), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
+    is_deleted = Column(Boolean, default=False)

@@ -5,6 +5,7 @@ from app.crud.project import create_project, get_projects, soft_delete_project, 
 from app.routers.auth import get_db
 from app.schemas.project import ProjectCreate, ProjectFilter, ProjectResponse, ProjectUpdate
 from app.utils.auth import get_current_user
+from app.utils.config import settings
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -34,7 +35,7 @@ def add_project(
     if current_user["role"] not in ["Admin", "Manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to add a project."
+            detail=settings.ADD_NOT_AUTHORIZED
         )
     return create_project(db=db, project=project, user_id=int(current_user["sub"]))
 
@@ -49,7 +50,7 @@ def update_project_by_id(
     if current_user["role"] not in ["Admin", "Manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to update projects."
+            detail=settings.UPDATE_NOT_AUTHORIZED
         )
 
     return update_project(db=db, project_id=project_id, project=project, user_id=int(current_user["sub"]))
@@ -63,12 +64,12 @@ def delete_project(
     if current_user["role"] not in ["Admin", "Manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to delete projects."
+            detail=settings.DELETE_NOT_AUTHORIZED
         )
 
     deleted_project = soft_delete_project(db, project_id)
 
     if not deleted_project:
-        raise HTTPException(status_code=404, detail="Project not found or already deleted")
+        raise HTTPException(status_code=404, detail=settings.NOT_FOUND)
 
-    return {"message": "Project deleted successfully"}
+    return {"message": settings.PROJECT_DELETE_SUCCESS} if deleted_project == "success" else {"message": settings.NOT_FOUND}
