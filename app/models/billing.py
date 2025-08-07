@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Enum, DateTime, ForeignKey, DECIMAL, Text, Boolean
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.database import Base
 import enum
 
@@ -23,3 +24,6 @@ class Billing(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
     is_deleted = Column(Boolean, default=False, nullable=False)
+
+    project = relationship("ProjectManagement", back_populates="billings")
+

@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, ForeignKey
-from sqlalchemy.sql import func
+from sqlalchemy import Boolean, Column, Integer, String, Enum, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
 from app.database import Base
 import enum
 
@@ -21,3 +21,8 @@ class CompanyManagement(Base):
     updated_by = Column(Integer, ForeignKey("user_master.id"), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
+    is_deleted = Column(Boolean, default=False)
+
+    projects = relationship("ProjectManagement", back_populates="company")
+
+
