@@ -45,6 +45,9 @@ def get_billing_history(
             project_url = project.production_url
         elif project_status == "beta":
             project_url = project.beta_url
+
+        elif project_status == "wip":
+            project_url = project.beta_url or project.production_url
         else:
             project_url = "N/A"
 
