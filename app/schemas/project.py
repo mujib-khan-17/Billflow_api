@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, root_validator
 from typing import Optional
 from datetime import date, datetime
 from app.models.project import ProjectStatus
@@ -60,7 +60,7 @@ class ProjectUpdate(BaseModel):
     status: Optional[ProjectStatus]
     company_name: Optional[str]
     
-    @model_validator(mode="before")
+    @root_validator(mode="before")
     @classmethod
     def check_live_date_for_production(cls, data):
         status = data.get("status")
