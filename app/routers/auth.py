@@ -8,7 +8,7 @@ from app.utils.auth import verify_password
 from app.utils.jwt import create_access_token
 from app.crud.auth import get_user_by_email
 from app.utils.config import settings
-from app.models.user import User
+from app.models.user import UserMaster
 from passlib.context import CryptContext
 
 router = APIRouter()
@@ -45,7 +45,7 @@ def login_oauth2(form_data: OAuth2PasswordRequestForm = Depends(), db: Session =
 def register(user: UserCreate, db: Session = Depends(get_db)):
     hashed_password = pwd_context.hash(user.password)
 
-    new_user = User(
+    new_user = UserMaster(
         email=user.email,
         password=hashed_password
     )
