@@ -60,7 +60,7 @@ class ProjectUpdate(BaseModel):
     status: Optional[ProjectStatus]
     company_name: Optional[str]
     
-    @root_validator(mode="before")
+    @root_validator(pre="true")
     @classmethod
     def check_live_date_for_production(cls, data):
         status = data.get("status")
