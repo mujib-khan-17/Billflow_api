@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from typing import Optional
 from datetime import date, datetime
 from app.models.project import ProjectStatus
+
 
 class ProjectCreate(BaseModel):
     project_code: str
@@ -13,16 +14,18 @@ class ProjectCreate(BaseModel):
     production_server: Optional[str] = None
     live_date: Optional[date] = None
     hosting_amount: Optional[float] = None
-    hosting_start_date: Optional[date] = None   
+    hosting_start_date: Optional[date] = None
     company_name: str
     currency: Optional[str] = None
     status: ProjectStatus  
+
 
 class ProjectFilter(BaseModel):
     status: Optional[ProjectStatus] = None
     company_id: Optional[int] = None
     sort_by: Optional[str] = Field(default="created_at")  
     sort_order: Optional[str] = Field(default="desc")  
+
 
 class ProjectResponse(BaseModel):
     id: int
@@ -40,27 +43,26 @@ class ProjectResponse(BaseModel):
     currency: str
     status: ProjectStatus
     created_at: Optional[datetime]
-
-    class Config:
-        orm_mode = True
+#
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProjectUpdate(BaseModel):
-    project_code: Optional[str]
-    project_name: Optional[str]
-    beta_url: Optional[str]
-    beta_server: Optional[str]
+    project_code: Optional[str] = None
+    project_name: Optional[str] = None
+    beta_url: Optional[str] = None
+    beta_server: Optional[str] = None
     beta_release_date: Optional[date] = None
-    production_url: Optional[str]
-    production_server: Optional[str]
+    production_url: Optional[str] = None
+    production_server: Optional[str] = None
     live_date: Optional[date] = None
     hosting_amount: Optional[float] = None
     hosting_start_date: Optional[date] = None
     currency: Optional[str] = None
-    status: Optional[ProjectStatus]
-    company_name: Optional[str]
-    
-    @root_validator(mode="before")
+    status: Optional[ProjectStatus] = None
+    company_name: Optional[str] = None
+
+    @model_validator(mode="before")
     @classmethod
     def check_live_date_for_production(cls, data):
         status = data.get("status")
@@ -70,7 +72,7 @@ class ProjectUpdate(BaseModel):
             raise ValueError("live_date is required when status is 'Production'")
 
         if status == "Beta":
-            data["live_date"] = None 
+            data["live_date"] = None
             data["hosting_start_date"] = None
 
         return data
