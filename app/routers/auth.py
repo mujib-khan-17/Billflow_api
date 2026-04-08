@@ -46,8 +46,13 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     hashed_password = pwd_context.hash(user.password)
 
     new_user = UserMaster(
-        email=user.email,
-        password=hashed_password
+        employee_code=user.employee_code,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email_id=user.email_id,
+        password=hashed_password,
+        role=user.role,
+        created_by=user.created_by
     )
 
     db.add(new_user)
